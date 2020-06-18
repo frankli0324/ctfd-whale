@@ -1,5 +1,7 @@
 # CTFd-Whale
 
+## [中文README](README.zh-cn.md)
+
 A plugin that empowers CTFd to bring up separate environments for each user
 
 ## Features
