@@ -168,6 +168,8 @@ services:
         ...
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+        depends_on:
+            - frpc #frpc需要先运行
         networks:
             ...
             frp_connect:
