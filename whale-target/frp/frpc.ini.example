@@ -1,0 +1,9 @@
+[common]
+token = random_me
+server_addr = 172.1.0.20
+server_port = 6490
+pool_count = 200
+admin_addr = 0.0.0.0
+admin_port = 7400
+admin_user = admin_change_me
+admin_pwd = password_change_me
