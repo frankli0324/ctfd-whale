@@ -4,6 +4,8 @@
 
 请确认你有过单机部署的经验，不建议第一次就搞这样分布架构
 
+建议有一定Docker部署及操作经验者阅读此文档
+
 在进行以下步骤之前，你需要先安装好ctfd-whale插件
 
 ## 目的
@@ -39,6 +41,7 @@ $ git clone https://github.com/frankli0324/ctfd-whale
 ```
 
 ### 开启docker swarm
+
 ```bash
 $ docker swarm init
 $ docker node update --label-add "name=linux-target-1" $(docker node ls -q)
@@ -183,13 +186,13 @@ $ tar xf certs.tar
 
 打开`CTFd-whale`的配置网页，按照如下配置docker
 
-![whale-config](imgs/whale-config1.png)
+![whale-config1](imgs/whale-config1.png)
 
 注意事项
 
 - `API URL` 一定要写成 `https://<target_ip>:<port>` 的形式
 - `Swarm Nodes` 写初始化 `docker swarm` 时添加的 `lable name`
-- `SSL CA Certificates` 的三个路径都是CTFd容器里的地址，不要和物理机的地址搞混了，如果你按照上一个步骤更改好了 `CTFd` 的 `docker-compose.yml` ，这里的地址照着填就好
+- `SSL CA Certificates` 等三个路径都是CTFd容器里的地址，不要和物理机的地址搞混了，如果你按照上一个步骤更改好了 `CTFd` 的 `docker-compose.yml` ，这里的地址照着填就好
 
 对于单容器的题目，`Auto Connect Network` 中的网络地址为`<folder_name>_<network_name>`，如果没有改动，则默认为 `whale-target_frp_containers`
 
@@ -225,12 +228,12 @@ $ cp frp/frpc.ini.example frp/frpc.ini
 打开 `frp/frps.ini`
 
 - 修改 `token` 字段， 此token用于frpc与frps通信的验证
-
 - 此处因为frps和frpc在同一台服务器中，不改也行
-
 - 如果你的target服务器处于内网中，可以将 `frps` 放在 `web` 服务器中，这时token就可以长一些，比如[生成一个随机UUID](https://www.uuidgenerator.net/)
-
 - 注意 `vhost_http_port` 与 [docker-compose.yml](/whale-target/docker-compose.yml) 里 `frps` 映射的端口相同
+- `subdomain_host` 是你做泛解析之后的域名，如果泛解析记录为`*.sub.example.com`, 则填入`sub.example.com`
+
+
 
 #### 打开 `frp/frpc.ini`
 
@@ -256,4 +259,10 @@ $ cp frp/frpc.ini.example frp/frpc.ini
 
 ---
 
-至此，分离部署的whale应该就能用了，可以找个题目来测试一下
+至此，分离部署的whale应该就能用了，可以找个题目来测试一下，不过注意docker_dynamic类型的题目似乎不可以被删除，请注意不要让其他管理员把测试题公开
+
+你可以用 
+```bash
+$ docker-compose logs 
+```
+来查看日志并调试，Ctrl-C退出

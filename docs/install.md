@@ -301,4 +301,4 @@ see how grouped containers are created in the [code](utils/docker.py#L58)
 
 ## Advanced Deployment
 
-To seprate the target server (for lunching instance) and CTFd web server with TLS secured docker API, please refer to [this document](advanced.md)
+To separate the target server (for lunching instance) and CTFd web server with TLS secured docker API, please refer to [this document](advanced.md)
