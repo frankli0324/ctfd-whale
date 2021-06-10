@@ -1,6 +1,0 @@
-[common]
-bind_port = 6490
-token = random_me
-vhost_http_port = 80
-subdomain_host = sub.example.com
-
