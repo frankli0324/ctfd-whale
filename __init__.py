@@ -16,13 +16,13 @@ from CTFd.utils.decorators import admins_only
 
 from .api import user_namespace, admin_namespace, AdminContainers
 from .challenge_type import DynamicValueDockerChallenge
-from .utils.cache import CacheProvider
 from .utils.checks import WhaleChecks
 from .utils.control import ControlUtil
 from .utils.db import DBContainer
 from .utils.docker import DockerUtils
-from .utils.exceptions import WhaleError, WhaleWarning
+from .utils.exceptions import WhaleWarning
 from .utils.setup import setup_default_configs
+from .utils.routers import Router
 
 
 def load(app):
@@ -70,7 +70,7 @@ def load(app):
         errors = WhaleChecks.perform()
         if not errors and get_config("whale:refresh", "false"):
             DockerUtils.init()
-            CacheProvider(app=current_app).init_port_sets()
+            Router.reset()
             set_config("whale:refresh", "false")
         return render_template('whale_config.html', errors=errors)
 
@@ -93,42 +93,10 @@ def load(app):
             for r in results:
                 ControlUtil.try_remove_container(r.user_id)
 
-            containers = DBContainer.get_all_alive_container()
-
-            config = ''.join([c.frp_config for c in containers])
-
-            try:
-                # you can authorize a connection by setting
-                # frp_url = http://user:pass@ip:port
-                frp_addr = get_config("whale:frp_api_url")
-                if not frp_addr:
-                    frp_addr = f'http://{get_config("whale:frp_api_ip", "frpc")}:{get_config("whale:frp_api_port", "7400")}'
-                    # backward compatibility
-                common = get_config("whale:frp_config_template", '')
-                if '[common]' in common:
-                    output = common + config
-                else:
-                    remote = requests.get(f'{frp_addr.rstrip("/")}/api/config')
-                    assert remote.status_code == 200
-                    set_config("whale:frp_config_template", remote.text)
-                    output = remote.text + config
-                assert requests.put(
-                    f'{frp_addr.rstrip("/")}/api/config', output, timeout=5
-                ).status_code == 200
-                assert requests.get(
-                    f'{frp_addr.rstrip("/")}/api/reload', timeout=5
-                ).status_code == 200
-            except (requests.RequestException, AssertionError) as e:
-                raise WhaleError(
-                    '\nfrpc request failed\n' +
-                    (f'{e}\n' if str(e) else '') +
-                    'please check the frp related configs'
-                ) from None
-
     app.register_blueprint(page_blueprint)
 
     try:
-        CacheProvider(app=app).init_port_sets()
+        Router.check_availability()
         DockerUtils.init()
     except Exception:
         warnings.warn("Initialization Failed. Please check your configs.", WhaleWarning)
