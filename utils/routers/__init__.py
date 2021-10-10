@@ -1,11 +1,11 @@
 from CTFd.utils import get_config
 
-from .base import BaseRouter
 from .frp import FrpRouter
+from .trp import TrpRouter
 
 _routers = {
-    cls.name: cls
-    for cls in BaseRouter.__subclasses__()
+    'frp': FrpRouter,
+    'trp': TrpRouter,
 }
 
 
@@ -25,7 +25,8 @@ class Router:
             Router._name = router_conftype
         return getattr(Router._router, name)
 
-    def reset(self):
+    @staticmethod
+    def reset():
         Router._name = ''
         Router._router = None
 

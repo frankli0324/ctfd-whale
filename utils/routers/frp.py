@@ -7,8 +7,8 @@ from CTFd.utils import get_config, set_config, logging
 
 from .base import BaseRouter
 from ..cache import CacheProvider
-from ..exceptions import WhaleError, WhaleWarning
 from ..db import DBContainer
+from ..exceptions import WhaleError, WhaleWarning
 from ...models import WhaleContainer
 
 
@@ -67,6 +67,9 @@ class FrpRouter(BaseRouter):
                 (f'{e}\n' if str(e) else '') +
                 'please check the frp related configs'
             ) from None
+
+    def access(self, container: WhaleContainer):
+        return container.user_access
 
     def register(self, container: WhaleContainer):
         name = f'{container.challenge.redirect_type}_{container.user_id}_{container.uuid}'
