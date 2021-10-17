@@ -11,11 +11,17 @@ class ControlUtil:
     @staticmethod
     def try_add_container(user_id, challenge_id):
         container = DBContainer.create_container_record(user_id, challenge_id)
+        try:
+            DockerUtils.add_container(container)
+        except Exception as e:
+            DBContainer.remove_container_record(user_id)
+            print(traceback.format_exc())
+            return False, 'Docker Creation Error'
         ok, msg = Router.register(container)
         if not ok:
+            DockerUtils.remove_container(container)
             DBContainer.remove_container_record(user_id)
             return False, msg
-        DockerUtils.add_container(container)
         return True, 'Container created'
 
     @staticmethod
