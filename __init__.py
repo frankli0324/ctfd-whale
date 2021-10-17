@@ -64,11 +64,15 @@ def load(app):
     CTFd_API_v1.add_namespace(admin_namespace, path="/plugins/ctfd-whale/admin")
     CTFd_API_v1.add_namespace(user_namespace, path="/plugins/ctfd-whale")
 
+    worker_config_commit = None
+
     @page_blueprint.route('/admin/settings')
     @admins_only
     def admin_list_configs():
+        nonlocal worker_config_commit
         errors = WhaleChecks.perform()
-        if not errors and get_config("whale:refresh", "false"):
+        if not errors and get_config("whale:refresh") != worker_config_commit:
+            worker_config_commit = get_config("whale:refresh")
             DockerUtils.init()
             Router.reset()
             set_config("whale:refresh", "false")

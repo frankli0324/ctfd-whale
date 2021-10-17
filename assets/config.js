@@ -13,6 +13,7 @@ $(".config-section > form:not(.form-upload)").submit(async function (event) {
             params[x] = obj[x];
         }
     }
+    params['whale:refresh'] = btoa(+new Date).slice(-7, -2);
 
     await CTFd.api.patch_config_list({}, params);
     location.reload();
@@ -20,6 +21,7 @@ $(".config-section > form:not(.form-upload)").submit(async function (event) {
 $(".config-section > form:not(.form-upload) > div > div > div > #router-type").change(async function () {
     await CTFd.api.patch_config_list({}, {
         'whale:router_type': $(this).val(),
+        'whale:refresh': btoa(+new Date).slice(-7, -2),
     });
     location.reload();
 });
