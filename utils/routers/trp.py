@@ -1,5 +1,5 @@
 import traceback
-from requests import session, RequestException
+from requests import session, RequestException, HTTPError
 
 from CTFd.utils import get_config
 from .base import BaseRouter
@@ -42,6 +42,8 @@ class TrpRouter(BaseRouter):
             })
             resp.raise_for_status()
             return True, 'success'
+        except HTTPError as e:
+            return False, e.response.text
         except RequestException as e:
             print(traceback.format_exc())
             return False, 'unable to access trp Api'
@@ -51,6 +53,8 @@ class TrpRouter(BaseRouter):
             resp = self.ses.delete(f'{self.url}/rule/{self.get_domain(container)}')
             resp.raise_for_status()
             return True, 'success'
+        except HTTPError as e:
+            return False, e.response.text
         except RequestException as e:
             print(traceback.format_exc())
             return False, 'unable to access trp Api'
