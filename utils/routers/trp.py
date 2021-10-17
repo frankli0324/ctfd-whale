@@ -37,7 +37,7 @@ class TrpRouter(BaseRouter):
     def register(self, container: WhaleContainer):
         try:
             resp = self.ses.post(f'{self.url}/rule/{self.get_domain(container)}', json={
-                'target': container.challenge.redirect_port,
+                'target': f'{container.user_id}-{container.uuid}:{container.challenge.redirect_port}',
                 'source': None,
             })
             resp.raise_for_status()
