@@ -75,9 +75,9 @@ Then frpc. Frpc should be running in the same network with the challenge contain
 
 ```bash
 docker run -it --restart=always -d  --network challenges -p 7400:7400 frankli0324/frp:frpc \
-    --server_addr=host_ip:host_port \
+    --server_addr=host_ip \
     --server_port=7000 \
-    --admin_addr=7400 \
+    --admin_addr=0.0.0.0 \
     --admin_port=7400 \
     --admin_user=username \
     --admin_pwd=password \
