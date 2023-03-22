@@ -59,7 +59,7 @@ class AdminContainers(Resource):
     @admins_only
     def delete():
         user_id = request.args.get('user_id')
-        result, message = ControlUtil.try_remove_container(user_id)
+        result, message = ControlUtil.try_remove_container(user_id, challenge_id)
         return {'success': result, 'message': message}
 
 
@@ -130,7 +130,8 @@ class UserContainers(Resource):
     @frequency_limited
     def delete():
         user_id = current_user.get_current_user().id
-        result, message = ControlUtil.try_remove_container(user_id)
+        challenge_id = request.args.get('challenge_id')
+        result, message = ControlUtil.try_remove_container(user_id, challenge_id)
         if not result:
             abort(403, message, success=False)
         return {'success': True, 'message': message}

@@ -104,5 +104,5 @@ class DynamicValueDockerChallenge(BaseChallenge):
         for container in WhaleContainer.query.filter_by(
             challenge_id=challenge.id
         ).all():
-            ControlUtil.try_remove_container(container.user_id)
+            ControlUtil.try_remove_container(container.user_id, container.challenge_id)
         super().delete(challenge)

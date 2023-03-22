@@ -32,7 +32,7 @@ $(".click-copy").click(function (e) {
 })
 
 async function delete_container(user_id) {
-    let response = await CTFd.fetch("/api/v1/plugins/ctfd-whale/admin/container?user_id=" + user_id, {
+    let response = await CTFd.fetch("/api/v1/plugins/ctfd-whale/admin/container?user_id=" + user_id + "&challenge_id=" + challenge_id, {
         method: "DELETE",
         credentials: "same-origin",
         headers: {
