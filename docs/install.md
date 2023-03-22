@@ -102,7 +102,7 @@ Create a folder in `conf/` called `frp`
 mkdir ./conf/frp
 ```
 
-then create a configuration file for frps `./conf/frp/frps.ini`, and fill it with:
+then create a configuration file for frps `./conf/frp/frps.ini`, and fill it with (remove the comments because they mess with the config file):
 
 ```ini
 [common]
