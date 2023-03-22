@@ -110,7 +110,7 @@ then create a configuration file for frps `./conf/frp/frps.ini`, and fill it wit
 bind_port = 7987  # port for frpc to connect to
 vhost_http_port = 8001  # port for mapping http challenges
 token = your_token
-subdomain_host = node3.buuoj.cn
+subdomain_host = your_domain
 # hostname that's mapped to frps by some reverse proxy (or IS frps itself)
 ```
 
@@ -249,12 +249,12 @@ If you wnat to go deeper:
 * add nginx to `default` and `internal` network
 * remove CTFd from `default` and remove the mapped 8000 port
 
-add following server block to `./conf/nginx/nginx.conf`:
+add following server block to `./conf/nginx/nginx.conf` and replace `<your-domain-here>` with your domain name:
 
 ```conf
 server {
   listen 80;
-  server_name *.node3.buuoj.cn;
+  server_name *.<your-domain-here>;
   location / {
     proxy_pass http://frps:8001;
     proxy_redirect off;
