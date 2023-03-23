@@ -59,7 +59,7 @@ class AdminContainers(Resource):
     @admins_only
     def delete():
         user_id = request.args.get('user_id')
-        user_id = request.args.get('challenge_id')
+        challenge_id = request.args.get('challenge_id')
         result, message = ControlUtil.try_remove_container(user_id, challenge_id)
         return {'success': result, 'message': message}
 
