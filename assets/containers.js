@@ -58,28 +58,28 @@ async function renew_container(user_id) {
 }
 
 $('#containers-renew-button').click(function (e) {
-    let users = $("input[data-user-id]:checked").map(function () {
-        return $(this).data("user-id");
+    let containers = $("input[data-user-id]:checked").map(function () {
+        return [[$(this).data("user-id"), $(this).data("challenge-id")]];
     });
     CTFd.ui.ezq.ezQuery({
         title: "Renew Containers",
         body: `Are you sure you want to renew the selected ${users.length} container(s)?`,
         success: async function () {
-            await Promise.all(users.toArray().map((user) => renew_container(user)));
+            await Promise.all(containers.toArray().map((container) => renew_container(container[0],container[1]container)));
             location.reload();
         }
     });
 });
 
 $('#containers-delete-button').click(function (e) {
-    let users = $("input[data-user-id]:checked").map(function () {
-        return $(this).data("user-id");
+    let containers = $("input[data-user-id]:checked").map(function () {
+        return [[$(this).data("user-id"), $(this).data("challenge-id")]];
     });
     CTFd.ui.ezq.ezQuery({
         title: "Delete Containers",
         body: `Are you sure you want to delete the selected ${users.length} container(s)?`,
         success: async function () {
-            await Promise.all(users.toArray().map((user) => delete_container(user)));
+            await Promise.all(containers.toArray().map((container) => delete_container(container[0],container[1])));
             location.reload();
         }
     });
