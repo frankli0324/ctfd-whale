@@ -65,7 +65,7 @@ $('#containers-renew-button').click(function (e) {
         title: "Renew Containers",
         body: `Are you sure you want to renew the selected ${users.length} container(s)?`,
         success: async function () {
-            await Promise.all(containers.toArray().map((container) => renew_container(container[0],container[1]container)));
+            await Promise.all(containers.toArray().map((container) => renew_container(container[0],container[1])));
             location.reload();
         }
     });
