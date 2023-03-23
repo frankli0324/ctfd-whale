@@ -31,7 +31,7 @@ $(".click-copy").click(function (e) {
     copyToClipboard(e, $(this).data("copy"));
 })
 
-async function delete_container(user_id) {
+async function delete_container(user_id, challenge_id) {
     let response = await CTFd.fetch("/api/v1/plugins/ctfd-whale/admin/container?user_id=" + user_id + "&challenge_id=" + challenge_id, {
         method: "DELETE",
         credentials: "same-origin",
@@ -43,7 +43,7 @@ async function delete_container(user_id) {
     response = await response.json();
     return response.success;
 }
-async function renew_container(user_id) {
+async function renew_container(user_id, challenge_id) {
     let response = await CTFd.fetch(
         "/api/v1/plugins/ctfd-whale/admin/container?user_id=" + user_id, {
         method: "PATCH",
@@ -89,14 +89,14 @@ $(".delete-container").click(function (e) {
     e.preventDefault();
     let container_id = $(this).attr("container-id");
     let user_id = $(this).attr("user-id");
-
+    let challenge_id = $(this).attr("challenge-id");
     CTFd.ui.ezq.ezQuery({
         title: "Destroy Container",
         body: "<span>Are you sure you want to delete <strong>Container #{0}</strong>?</span>".format(
             htmlentities(container_id)
         ),
         success: async function () {
-            await delete_container(user_id);
+            await delete_container(user_id, challenge_id);
             location.reload();
         }
     });
@@ -106,14 +106,14 @@ $(".renew-container").click(function (e) {
     e.preventDefault();
     let container_id = $(this).attr("container-id");
     let user_id = $(this).attr("user-id");
-
+    let challenge_id = $(this).attr("challenge-id");
     CTFd.ui.ezq.ezQuery({
         title: "Renew Container",
         body: "<span>Are you sure you want to renew <strong>Container #{0}</strong>?</span>".format(
             htmlentities(container_id)
         ),
         success: async function () {
-            await renew_container(user_id);
+            await renew_container(user_id, challenge_id);
             location.reload();
         },
     });
