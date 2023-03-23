@@ -14,19 +14,19 @@ class ControlUtil:
         try:
             DockerUtils.add_container(container)
         except Exception as e:
-            DBContainer.remove_container_record(user_id)
+            DBContainer.remove_container_record(user_id, challenge_id)
             print(traceback.format_exc())
             return False, 'Docker Creation Error'
         ok, msg = Router.register(container)
         if not ok:
             DockerUtils.remove_container(container)
-            DBContainer.remove_container_record(user_id)
+            DBContainer.remove_container_record(user_id, challenge_id)
             return False, msg
         return True, 'Container created'
 
     @staticmethod
-    def try_remove_container(user_id):
-        container = DBContainer.get_current_containers(user_id=user_id)
+    def try_remove_container(user_id, challenge_id):
+        container = DBContainer.get_current_containers(user_id=user_id, challenge_id=challenge_id)
         if not container:
             return False, 'No such container'
         for _ in range(3):  # configurable? as "onerror_retry_cnt"
@@ -35,15 +35,15 @@ class ControlUtil:
                 if not ok:
                     return False, msg
                 DockerUtils.remove_container(container)
-                DBContainer.remove_container_record(user_id)
+                DBContainer.remove_container_record(user_id, challenge_id)
                 return True, 'Container destroyed'
             except Exception as e:
                 print(traceback.format_exc())
         return False, 'Failed when destroying instance, please contact admin!'
 
     @staticmethod
-    def try_renew_container(user_id):
-        container = DBContainer.get_current_containers(user_id)
+    def try_renew_container(user_id, challenge_id):
+        container = DBContainer.get_current_containers(user_id, challenge_id)
         if not container:
             return False, 'No such container'
         timeout = int(get_config("whale:docker_timeout", "3600"))
