@@ -10,19 +10,23 @@ from .routers import Router
 class ControlUtil:
     @staticmethod
     def try_add_container(user_id, challenge_id):
-        container = DBContainer.create_container_record(user_id, challenge_id)
-        try:
-            DockerUtils.add_container(container)
-        except Exception as e:
-            DBContainer.remove_container_record(user_id, challenge_id)
-            print(traceback.format_exc())
-            return False, 'Docker Creation Error'
-        ok, msg = Router.register(container)
-        if not ok:
-            DockerUtils.remove_container(container)
-            DBContainer.remove_container_record(user_id, challenge_id)
-            return False, msg
-        return True, 'Container created'
+        container = DBContainer.get_current_containers(user_id=user_id, challenge_id=challenge_id)
+        if not container:   # Do not re-create container of the same challenge again (Prevent Abuse) 
+            container = DBContainer.create_container_record(user_id, challenge_id)
+            try:
+                DockerUtils.add_container(container)
+            except Exception as e:
+                DBContainer.remove_container_record(user_id, challenge_id)
+                print(traceback.format_exc())
+                return False, 'Docker Creation Error'
+            ok, msg = Router.register(container)
+            if not ok:
+                DockerUtils.remove_container(container)
+                DBContainer.remove_container_record(user_id, challenge_id)
+                return False, msg
+            return True, 'Container created'
+        else:
+            return False, 'Container already exists'
 
     @staticmethod
     def try_remove_container(user_id, challenge_id):
