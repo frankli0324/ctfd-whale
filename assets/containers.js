@@ -45,7 +45,7 @@ async function delete_container(user_id, challenge_id) {
 }
 async function renew_container(user_id, challenge_id) {
     let response = await CTFd.fetch(
-        "/api/v1/plugins/ctfd-whale/admin/container?user_id=" + user_id, {
+        "/api/v1/plugins/ctfd-whale/admin/container?user_id=" + user_id + "&challenge_id=" + challenge_id, {
         method: "PATCH",
         credentials: "same-origin",
         headers: {

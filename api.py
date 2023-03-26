@@ -50,6 +50,7 @@ class AdminContainers(Resource):
     @admins_only
     def patch():
         user_id = request.args.get('user_id', -1)
+        challenge_id = request.args.get('challenge_id', -1)
         result, message = ControlUtil.try_renew_container(user_id=int(user_id), challenge_id=int(challenge_id))
         if not result:
             abort(403, message, success=False)
