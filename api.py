@@ -79,12 +79,13 @@ class UserContainers(Resource):
         timeout = int(get_config("whale:docker_timeout", "3600"))
         if int(container.challenge_id) != int(challenge_id):
             return abort(403, f'Container started but not from this challenge ({container.challenge.name})', success=False)
+        print(type(container.start_time))
         return {
             'success': True,
             'data': {
                 'lan_domain': str(user_id) + "-" + container.uuid,
                 'user_access': Router.access(container),
-                'remaining_time': timeout - (datetime.now() - container.start_time).seconds,
+                'remaining_time': timeout - (datetime.now() - datetime.strptime(container.start_time,'%Y-%m-%d %H:%M:%S.%f')).seconds,
             }
         }
 
