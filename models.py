@@ -49,6 +49,7 @@ class DynamicDockerChallenge(Challenges):
     docker_image = db.Column(db.Text, default=0)
     redirect_type = db.Column(db.Text, default=0)
     redirect_port = db.Column(db.Integer, default=0)
+    function = db.Column(db.String(32), default="logarithmic")
 
     def __init__(self, *args, **kwargs):
         super(DynamicDockerChallenge, self).__init__(**kwargs)
