@@ -18,7 +18,7 @@
         value !=None %}value="{{ value }}" {% endif %}>
     </div>
 {% endfor %}
-{% set frpc_template = get_config("whale:frp_config_template") %}
+{% set frpc_template = get_config("whale:frp_config_template", "") %}
 <div class="form-group">
     <label for="frp-config-template">
         Frpc config template

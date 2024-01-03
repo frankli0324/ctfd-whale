@@ -179,7 +179,7 @@ CTFd._internal.challenge.renew = function () {
             loadInfo();
             CTFd._functions.events.eventAlert({
                 title: "Success",
-                body: "Your instance has been renewed!",
+                html: "Your instance has been renewed!",
                 button: "OK"
             });
         } else {
