@@ -3,7 +3,7 @@ from docker.errors import DockerException, TLSParameterError, APIError, requests
 from CTFd.utils import get_config
 
 from .docker import get_docker_client
-from .routers import Router
+from .routers import Router, _routers
 
 
 class WhaleChecks:
@@ -32,7 +32,10 @@ class WhaleChecks:
 
     @staticmethod
     def check_frp_connection():
-        ok, msg = Router.check_availability()
+        router_conftype = get_config("whale:router_type", "frp")
+        if router_conftype not in _routers:
+            return "invalid router type: " + router_conftype
+        ok, msg = _routers[router_conftype]().check_availability()
         if not ok:
             return msg
 
