@@ -5,9 +5,7 @@ CTFd._internal.challenge.renderer = null;
 CTFd._internal.challenge.preRender = function () {
 }
 
-CTFd._internal.challenge.render = function (markdown) {
-    return CTFd._internal.challenge.renderer.render(markdown)
-}
+CTFd._internal.challenge.render = null;
 
 CTFd._internal.challenge.postRender = function () {
     loadInfo();
@@ -16,7 +14,7 @@ CTFd._internal.challenge.postRender = function () {
 if (window.$ === undefined) window.$ = CTFd.lib.$;
 
 function loadInfo() {
-    var challenge_id = $('#challenge-id').val();
+    var challenge_id = CTFd._internal.challenge.data.id;
     var url = "/api/v1/plugins/ctfd-whale/container?challenge_id=" + challenge_id;
 
     var params = {};
@@ -101,7 +99,7 @@ function loadInfo() {
 };
 
 CTFd._internal.challenge.destroy = function () {
-    var challenge_id = $('#challenge-id').val();
+    var challenge_id = CTFd._internal.challenge.data.id;
     var url = "/api/v1/plugins/ctfd-whale/container?challenge_id=" + challenge_id;
 
     $('#whale-button-destroy')[0].innerHTML = "Waiting...";
@@ -148,7 +146,7 @@ CTFd._internal.challenge.destroy = function () {
 };
 
 CTFd._internal.challenge.renew = function () {
-    var challenge_id = $('#challenge-id').val();
+    var challenge_id = CTFd._internal.challenge.data.id;
     var url = "/api/v1/plugins/ctfd-whale/container?challenge_id=" + challenge_id;
 
     $('#whale-button-renew')[0].innerHTML = "Waiting...";
@@ -195,7 +193,7 @@ CTFd._internal.challenge.renew = function () {
 };
 
 CTFd._internal.challenge.boot = function () {
-    var challenge_id = $('#challenge-id').val();
+    var challenge_id = CTFd._internal.challenge.data.id;
     var url = "/api/v1/plugins/ctfd-whale/container?challenge_id=" + challenge_id;
 
     $('#whale-button-boot')[0].innerHTML = "Waiting...";
@@ -243,7 +241,7 @@ CTFd._internal.challenge.boot = function () {
 
 
 CTFd._internal.challenge.submit = function (preview) {
-    var challenge_id = $('#challenge-id').val();
+    var challenge_id = CTFd._internal.challenge.data.id;
     var submission = $('#challenge-input').val()
 
     var body = {

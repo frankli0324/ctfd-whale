@@ -26,6 +26,7 @@ from .utils.routers import Router
 
 
 def load(app):
+    app.config['RESTX_ERROR_404_HELP'] = False
     # upgrade()
     plugin_name = __name__.split('.')[-1]
     set_config('whale:plugin_name', plugin_name)
