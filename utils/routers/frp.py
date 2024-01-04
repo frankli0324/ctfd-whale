@@ -90,7 +90,7 @@ class FrpRouter(BaseRouter):
             host = get_config("whale:frp_http_domain_suffix", "")
             port = get_config("whale:frp_http_port", "80")
             host += f':{port}' if port != 80 else ''
-            return f'<a target="_blank" href="http://{container.http_subdomain}.{host}/">题目链接</a>'
+            return f'<a target="_blank" href="http://{container.http_subdomain}.{host}/">Link to the Challenge</a>'
         return ''
 
     def register(self, container: WhaleContainer):
