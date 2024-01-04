@@ -56,6 +56,8 @@ class DynamicValueDockerChallenge(BaseChallenge):
             # We need to set these to floats so that the next operations don't operate on strings
             if attr in ("initial", "minimum", "decay"):
                 value = float(value)
+            if attr == 'dynamic_score':
+                value = int(value)
             setattr(challenge, attr, value)
 
         if challenge.dynamic_score == 1:
@@ -96,8 +98,6 @@ class DynamicValueDockerChallenge(BaseChallenge):
 
         if challenge.dynamic_score == 1:
             DynamicValueChallenge.calculate_value(challenge)
-
-        db.session.commit()
 
     @classmethod
     def delete(cls, challenge):
