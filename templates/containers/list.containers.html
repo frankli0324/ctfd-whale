@@ -1,8 +1,3 @@
-<svg hidden>
-    <symbol id="copy" viewBox="0 0 24 24">
-        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
-    </symbol>
-</svg>
 <div class="row">
     <div class="col-md-12">
         <table class="table table-striped border">
@@ -46,34 +41,34 @@
                     </td>
                     <td class="text-center">
                         {{ container.challenge.redirect_type }}&nbsp;
-                        <svg class="click-copy" data-copy="{{ container.user_access }}"
-                            height="24" width="24" style="cursor: pointer;">
-                            <use xlink:href="#copy" />
-                        </svg>
+                        <button class="btn btn-link p-0 click-copy" data-copy="{{ container.user_access }}">
+                            <i class="fas fa-clipboard"></i>
+                        </button>
                     </td>
                     <td class="text-center">
-                        <svg class="click-copy" data-copy="{{ container.flag }}"
-                            height="24" width="24" style="cursor: pointer;">
-                            <use xlink:href="#copy" />
-                        </svg>
+                        <button class="btn btn-link p-0 click-copy" data-copy="{{ container.flag }}">
+                            <i class="fas fa-clipboard"></i>
+                        </button>
                     </td>
                     <td class="text-center">
-                        {{ container.start_time }}
+                        <span data-time="{{ container.start_time | isoformat }}"></span>
                     </td>
                     <td class="text-center">
                         {{ container.renew_count }}&nbsp;
-                        <a class="renew-container" container-id="{{ container.id }}" data-toggle="tooltip"
+                        <button class="btn btn-link p-0 renew-container"
+                           container-id="{{ container.id }}" data-toggle="tooltip"
                            user-id="{{ container.user.id }}" data-placement="top"
                            title="Renew Container #{{ container.id }}">
                             <i class="fas fa-sync"></i>
-                        </a>
+                        </button>
                     </td>
                     <td class="text-center">
-                        <a class="delete-container" container-id="{{ container.id }}" data-toggle="tooltip"
+                        <button class="btn btn-link p-0 delete-container"
+                           container-id="{{ container.id }}" data-toggle="tooltip"
                            user-id="{{ container.user.id }}" data-placement="top"
                            title="Destroy Container #{{ container.id }}">
                             <i class="fas fa-times"></i>
-                        </a>
+                    </button>
                     </td>
                 </tr>
             {% endfor %}

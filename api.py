@@ -75,8 +75,10 @@ class UserContainers(Resource):
         if not container:
             return {'success': True, 'data': {}}
         timeout = int(get_config("whale:docker_timeout", "3600"))
+        c = container.challenge # build a url for quick jump. todo: escape dash in categories and names.
+        link = f'<a target="_blank" href="/challenges#{c.category}-{c.name}-{c.id}">{c.name}</a>'
         if int(container.challenge_id) != int(challenge_id):
-            return abort(403, f'Container started but not from this challenge ({container.challenge.name})', success=False)
+            return abort(403, f'Container already started but not from this challenge ({link})', success=False)
         return {
             'success': True,
             'data': {
