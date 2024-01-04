@@ -102,8 +102,8 @@ CTFd._internal.challenge.destroy = function () {
     var challenge_id = CTFd._internal.challenge.data.id;
     var url = "/api/v1/plugins/ctfd-whale/container?challenge_id=" + challenge_id;
 
-    $('#whale-button-destroy')[0].innerHTML = "Waiting...";
-    $('#whale-button-destroy')[0].disabled = true;
+    $('#whale-button-destroy').text("Waiting...");
+    $('#whale-button-destroy').prop('disabled', true);
 
     var params = {};
 
@@ -134,14 +134,15 @@ CTFd._internal.challenge.destroy = function () {
                 button: "OK"
             });
         } else {
-            $('#whale-button-destroy')[0].innerHTML = "Destroy this instance";
-            $('#whale-button-destroy')[0].disabled = false;
             CTFd._functions.events.eventAlert({
                 title: "Fail",
                 html: response.message,
                 button: "OK"
             });
         }
+    }).finally(() => {
+        $('#whale-button-destroy').text("Destroy this instance");
+        $('#whale-button-destroy').prop('disabled', false);
     });
 };
 
@@ -149,8 +150,8 @@ CTFd._internal.challenge.renew = function () {
     var challenge_id = CTFd._internal.challenge.data.id;
     var url = "/api/v1/plugins/ctfd-whale/container?challenge_id=" + challenge_id;
 
-    $('#whale-button-renew')[0].innerHTML = "Waiting...";
-    $('#whale-button-renew')[0].disabled = true;
+    $('#whale-button-renew').text("Waiting...");
+    $('#whale-button-renew').prop('disabled', true);
 
     var params = {};
 
@@ -181,14 +182,15 @@ CTFd._internal.challenge.renew = function () {
                 button: "OK"
             });
         } else {
-            $('#whale-button-renew')[0].innerHTML = "Renew this instance";
-            $('#whale-button-renew')[0].disabled = false;
             CTFd._functions.events.eventAlert({
                 title: "Fail",
                 html: response.message,
                 button: "OK"
             });
         }
+    }).finally(() => {
+        $('#whale-button-renew').text("Renew this instance");
+        $('#whale-button-renew').prop('disabled', false);
     });
 };
 
@@ -196,8 +198,8 @@ CTFd._internal.challenge.boot = function () {
     var challenge_id = CTFd._internal.challenge.data.id;
     var url = "/api/v1/plugins/ctfd-whale/container?challenge_id=" + challenge_id;
 
-    $('#whale-button-boot')[0].innerHTML = "Waiting...";
-    $('#whale-button-boot')[0].disabled = true;
+    $('#whale-button-boot').text("Waiting...");
+    $('#whale-button-boot').prop('disabled', true);
 
     var params = {};
 
@@ -228,14 +230,15 @@ CTFd._internal.challenge.boot = function () {
                 button: "OK"
             });
         } else {
-            $('#whale-button-boot')[0].innerHTML = "Launch an instance";
-            $('#whale-button-boot')[0].disabled = false;
             CTFd._functions.events.eventAlert({
                 title: "Fail",
                 html: response.message,
                 button: "OK"
             });
         }
+    }).finally(() => {
+        $('#whale-button-boot').text("Launch an instance");
+        $('#whale-button-boot').prop('disabled', false);
     });
 };
 
