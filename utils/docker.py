@@ -63,7 +63,15 @@ class DockerUtils:
             container.challenge.docker_image,
             get_config("whale:docker_swarm_nodes", "").split(",")
         )
-
+        credentials = get_config("whale:docker_credentials")
+        if credentials and credentials.count(':') == 1:
+            try:
+                image = client.images.get(container.challenge.docker_image)
+            except docker.errors.ImageNotFound:
+                pass
+            if image == None:
+                client.images.pull(container.challenge.docker_image)
+                print(f"pulling image {container.challenge.docker_image}")
         client.services.create(
             image=container.challenge.docker_image,
             name=f'{container.user_id}-{container.uuid}',
