@@ -43,7 +43,7 @@ class DockerUtils:
                 'if you are using unix:///var/run/docker.sock, check if the socket is correctly mapped'
             )
         credentials = get_config("whale:docker_credentials")
-        if credentials and credentials.count(':') == 1:
+        if credentials and credentials.count(':') >= 1:
             try:
                 DockerUtils.client.login(*credentials.split(':'))
             except Exception:
@@ -64,12 +64,12 @@ class DockerUtils:
             get_config("whale:docker_swarm_nodes", "").split(",")
         )
         credentials = get_config("whale:docker_credentials")
-        if credentials and credentials.count(':') == 1:
+        if credentials and credentials.count(':') >= 1:
             try:
                 image = client.images.get(container.challenge.docker_image)
+                print(f"image {image} found!")
             except docker.errors.ImageNotFound:
-                pass
-            if image == None:
+                print(f"image not found, pulling...")
                 client.images.pull(container.challenge.docker_image)
                 print(f"pulling image {container.challenge.docker_image}")
         client.services.create(
