@@ -72,6 +72,13 @@ class DockerUtils:
                 print(f"image not found, pulling...")
                 client.images.pull(container.challenge.docker_image)
                 print(f"pulling image {container.challenge.docker_image}")
+            except docker.errors.APIError:
+                print("registry login issues.. retrying to login")
+                credentials = get_config("whale:docker_credentials")
+                client.login(*credentials.split(':'))
+                print(f"pulling image {container.challenge.docker_image}")
+                client.images.pull(container.challenge.docker_image)
+
         client.services.create(
             image=container.challenge.docker_image,
             name=f'{container.user_id}-{container.uuid}',
