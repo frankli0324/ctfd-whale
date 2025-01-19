@@ -124,7 +124,7 @@ class FrpRouter(BaseRouter):
 
     def check_availability(self):
         try:
-            resp = self.ses.get(f'{self.url}/api/status')
+            resp = self.ses.get(f'{self.url}/api/status', timeout=2.0)
         except RequestException as e:
             return False, 'Unable to access frpc admin api'
         if resp.status_code == 401:
