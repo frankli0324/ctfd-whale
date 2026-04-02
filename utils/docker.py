@@ -52,19 +52,19 @@ class DockerUtils:
     @staticmethod
     def add_container(container):
         if container.challenge.docker_image.startswith("{"):
-            DockerUtils._create_grouped_container(DockerUtils.client, container)
+            DockerUtils._create_grouped_container(container)
         else:
-            DockerUtils._create_standalone_container(DockerUtils.client, container)
+            DockerUtils._create_standalone_container(container)
 
     @staticmethod
-    def _create_standalone_container(client, container):
+    def _create_standalone_container(container):
         dns = get_config("whale:docker_dns", "").split(",")
         node = DockerUtils.choose_node(
             container.challenge.docker_image,
             get_config("whale:docker_swarm_nodes", "").split(",")
         )
 
-        client.services.create(
+        DockerUtils.client.services.create(
             image=container.challenge.docker_image,
             name=f'{container.user_id}-{container.uuid}',
             env={'FLAG': container.flag}, dns_config=docker.types.DNSConfig(nameservers=dns),
@@ -82,14 +82,15 @@ class DockerUtils:
         )
 
     @staticmethod
-    def _create_grouped_container(client, container):
-        range_prefix = CacheProvider(app=current_app).get_available_network_range()
+    def _create_grouped_container(container):
+        cache = CacheProvider(app=current_app)
+        range_prefix = cache.get_available_network_range()
 
         ipam_pool = docker.types.IPAMPool(subnet=range_prefix)
         ipam_config = docker.types.IPAMConfig(
             driver='default', pool_configs=[ipam_pool])
         network_name = f'{container.user_id}-{container.uuid}'
-        network = client.networks.create(
+        network = DockerUtils.client.networks.create(
             network_name, internal=True,
             ipam=ipam_config, attachable=True,
             labels={'prefix': range_prefix},
@@ -110,39 +111,53 @@ class DockerUtils:
 
         has_processed_main = False
         try:
-            images = json.loads(
-                container.challenge.docker_image,
-                object_pairs_hook=OrderedDict
-            )
-        except json.JSONDecodeError:
-            raise WhaleError(
-                "Challenge Image Parse Error\n"
-                "plase check the challenge image string"
-            )
-        for name, image in images.items():
-            if has_processed_main:
-                container_name = f'{container.user_id}-{uuid.uuid4()}'
-            else:
-                container_name = f'{container.user_id}-{container.uuid}'
-                node = DockerUtils.choose_node(image, get_config("whale:docker_swarm_nodes", "").split(","))
-                has_processed_main = True
-            client.services.create(
-                image=image, name=container_name, networks=[
-                    docker.types.NetworkAttachmentConfig(network_name, aliases=[name])
-                ],
-                env={'FLAG': container.flag},
-                dns_config=docker.types.DNSConfig(nameservers=dns),
-                resources=docker.types.Resources(
-                    mem_limit=DockerUtils.convert_readable_text(
-                        container.challenge.memory_limit
-                    ),
-                    cpu_limit=int(container.challenge.cpu_limit * 1e9)),
-                labels={
-                    'whale_id': f'{container.user_id}-{container.uuid}'
-                },  # for container deletion
-                hostname=name, constraints=['node.labels.name==' + node],
-                endpoint_spec=docker.types.EndpointSpec(mode='dnsrr', ports={})
-            )
+            try:
+                images = json.loads(
+                    container.challenge.docker_image,
+                    object_pairs_hook=OrderedDict
+                )
+            except json.JSONDecodeError:
+                raise WhaleError(
+                    "Challenge Image Parse Error\n"
+                    "plase check the challenge image string"
+                )
+            for name, image in images.items():
+                if has_processed_main:
+                    container_name = f'{container.user_id}-{uuid.uuid4()}'
+                else:
+                    container_name = f'{container.user_id}-{container.uuid}'
+                    node = DockerUtils.choose_node(image, get_config("whale:docker_swarm_nodes", "").split(","))
+                    has_processed_main = True
+                DockerUtils.client.services.create(
+                    image=image, name=container_name, networks=[
+                        docker.types.NetworkAttachmentConfig(network_name, aliases=[name])
+                    ],
+                    env={'FLAG': container.flag},
+                    dns_config=docker.types.DNSConfig(nameservers=dns),
+                    resources=docker.types.Resources(
+                        mem_limit=DockerUtils.convert_readable_text(
+                            container.challenge.memory_limit
+                        ),
+                        cpu_limit=int(container.challenge.cpu_limit * 1e9)),
+                    labels={
+                        'whale_id': f'{container.user_id}-{container.uuid}'
+                    },  # for container deletion
+                    hostname=name, constraints=['node.labels.name==' + node],
+                    endpoint_spec=docker.types.EndpointSpec(mode='dnsrr', ports={})
+                )
+        except Exception:
+            whale_id = f'{container.user_id}-{container.uuid}'
+            for s in DockerUtils.client.services.list(filters={'label': f'whale_id={whale_id}'}):
+                s.remove()
+            auto_containers = get_config("whale:docker_auto_connect_containers", "").split(",")
+            for c in auto_containers:
+                try:
+                    network.disconnect(c, force=True)
+                except Exception:
+                    pass
+            network.remove()
+            cache.add_available_network_range(range_prefix)
+            raise
 
     @staticmethod
     def remove_container(container):
@@ -161,8 +176,8 @@ class DockerUtils:
                         network.disconnect(container, force=True)
                     except Exception:
                         pass
-                redis_util.add_available_network_range(network.attrs['Labels']['prefix'])
                 network.remove()
+                redis_util.add_available_network_range(network.attrs['Labels']['prefix'])
 
     @staticmethod
     def convert_readable_text(text):
@@ -177,7 +192,7 @@ class DockerUtils:
         if lower_text.endswith("g"):
             return int(text[:-1]) * 1024 * 1024 * 1024
 
-        return 0
+        return int(text)
 
     @staticmethod
     def choose_node(image, nodes):

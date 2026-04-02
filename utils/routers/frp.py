@@ -89,7 +89,7 @@ class FrpRouter(BaseRouter):
         elif container.challenge.redirect_type == 'http':
             host = get_config("whale:frp_http_domain_suffix", "")
             port = get_config("whale:frp_http_port", "80")
-            host += f':{port}' if port != 80 else ''
+            host += f':{port}' if port != '80' else ''
             return f'<a target="_blank" href="http://{container.http_subdomain}.{host}/">Link to the Challenge</a>'
         return ''
 
