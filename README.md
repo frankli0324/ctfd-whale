@@ -16,6 +16,8 @@ A plugin that empowers CTFd to bring up separate environments for each user
 
 refer to [installation guide](docs/install.md)
 
+Please note that whale assumes `CACHE_TYPE=redis`. Using other cache types may cause unexpected issues.
+
 ## Demo
 
 [BUUCTF](https://buuoj.cn)

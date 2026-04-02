@@ -15,6 +15,8 @@
 
 请参考[安装指南](docs/install.zh-cn.md)
 
+请注意whale假设`CACHE_TYPE=redis`。配置使用别的缓存方式可能会导致异常行为。
+
 ## Demo
 
 [BUUCTF](https://buuoj.cn)
