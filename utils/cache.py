@@ -104,12 +104,21 @@ class FilesystemCacheProvider:
     def release_lock(self):
         return True
 
+    def acquire_global_lock(self):
+        return True
+
+    def release_global_lock(self):
+        return True
+
 
 class RedisCacheProvider(FlaskRedis):
+    _GLOBAL_CONTAINER_LOCK = 'ctfd_whale_global_container_lock'
+
     def __init__(self, app, *args, **kwargs):
         super().__init__(app)
         self.key = 'ctfd_whale_lock-' + str(kwargs.get('user_id', 0))
         self.current_lock = None
+        self._global_lock = None
         self.global_port_key = "ctfd_whale-port-set"
         self.global_network_key = "ctfd_whale-network-set"
 
@@ -145,6 +154,22 @@ class RedisCacheProvider(FlaskRedis):
         try:
             self.current_lock.release()
 
+            return True
+        except LockError:
+            return False
+
+    def acquire_global_lock(self):
+        lock = self.lock(name=self._GLOBAL_CONTAINER_LOCK, timeout=10)
+        if not lock.acquire(blocking=True, blocking_timeout=5.0):
+            return False
+        self._global_lock = lock
+        return True
+
+    def release_global_lock(self):
+        if self._global_lock is None:
+            return False
+        try:
+            self._global_lock.release()
             return True
         except LockError:
             return False
