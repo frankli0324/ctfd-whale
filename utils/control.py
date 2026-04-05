@@ -16,7 +16,8 @@ class ControlUtil:
         if not cache.acquire_global_lock():
             return False, 'Server busy, please retry.'
         try:
-            if DBContainer.get_all_alive_container_count() > get_config("whale:max_containers", 1000):
+            limit = int(get_config("whale:docker_max_container_count", 1000))
+            if int(DBContainer.get_all_alive_container_count()) > limit:
                 return False, 'Max container count exceed.'
             container = DBContainer.create_container_record(user_id, challenge_id)
         finally:
