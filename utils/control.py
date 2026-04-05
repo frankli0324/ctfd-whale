@@ -1,7 +1,9 @@
 import datetime
 import traceback
 
+from flask import current_app
 from CTFd.utils import get_config
+from .cache import CacheProvider
 from .db import DBContainer, db
 from .docker import DockerUtils
 from .routers import Router
@@ -10,13 +12,15 @@ from .routers import Router
 class ControlUtil:
     @staticmethod
     def try_add_container(user_id, challenge_id):
-        if DBContainer.get_all_alive_container_count() > get_config("whale:max_containers", 1000):
-            # TODO: total container count may exceed configured limit if many users create container at the same time
-            # this may happen especially when event is just started
-            # simple solution is to lock this two lines, but implementing a queue system is better
-            # historically this was intensional so players gets a better experience when event is just started, but better fix it still
-            return False, 'Max container count exceed.'
-        container = DBContainer.create_container_record(user_id, challenge_id)
+        cache = CacheProvider(app=current_app)
+        if not cache.acquire_global_lock():
+            return False, 'Server busy, please retry.'
+        try:
+            if DBContainer.get_all_alive_container_count() > get_config("whale:max_containers", 1000):
+                return False, 'Max container count exceed.'
+            container = DBContainer.create_container_record(user_id, challenge_id)
+        finally:
+            cache.release_global_lock()
         try:
             DockerUtils.add_container(container)
             ok, msg = Router.register(container)
