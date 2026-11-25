@@ -1,3 +1,5 @@
+import json
+import re
 import warnings
 
 from flask import current_app
@@ -21,11 +23,29 @@ class FrpRouter(BaseRouter):
     }
 
     class FrpRule:
-        def __init__(self, name, config):
+        def __init__(self, name, config, config_format='ini'):
             self.name = name
             self.config = config
+            self.config_format = config_format
 
         def __str__(self) -> str:
+            if self.config_format == 'toml':
+                keys = {
+                    'local_ip': 'localIP',
+                    'local_port': 'localPort',
+                    'remote_port': 'remotePort',
+                    'use_compression': 'transport.useCompression',
+                }
+                config = {'name': self.name, **self.config}
+                lines = ['[[proxies]]']
+                for key, value in config.items():
+                    if key in ('local_port', 'remote_port'):
+                        value = int(value)
+                    elif key == 'use_compression':
+                        value = value == 'true'
+                    value = json.dumps(value, ensure_ascii=False).replace('\x7f', '\\u007f')
+                    lines.append(f'{keys.get(key, key)} = {value}')
+                return '\n'.join(lines)
             return f'[{self.name}]\n' + '\n'.join(f'{k} = {v}' for k, v in self.config.items())
 
     def __init__(self):
@@ -33,6 +53,7 @@ class FrpRouter(BaseRouter):
         self.ses = session()
         self.url = get_config("whale:frp_api_url").rstrip("/")
         self.common = ''
+        self.config_format = 'ini'
         try:
             CacheProvider(app=current_app).init_port_sets()
         except Exception:
@@ -42,6 +63,12 @@ class FrpRouter(BaseRouter):
             )
 
     def reload(self, exclude=None):
+        config_format = get_config('whale:frp_config_format', 'ini')
+        if config_format not in ('ini', 'toml'):
+            raise WhaleError('FRP config format must be ini or toml')
+        if config_format != self.config_format:
+            self.common = ''
+            self.config_format = config_format
         rules = []
         for container in DBContainer.get_all_alive_container():
             if container.uuid == exclude:
@@ -57,19 +84,35 @@ class FrpRouter(BaseRouter):
                 config['subdomain'] = container.http_subdomain
             elif config['type'] == 'tcp':
                 config['remote_port'] = container.port
-            rules.append(self.FrpRule(name, config))
+            rules.append(self.FrpRule(name, config, config_format))
 
         try:
             if not self.common:
                 common = get_config("whale:frp_config_template", '')
-                if '[common]' in common:
+                template_matches = '[common]' in common
+                if config_format == 'toml':
+                    template_matches = bool(common.strip()) and not template_matches
+                if template_matches:
                     self.common = common
                 else:
                     remote = self.ses.get(f'{self.url}/api/config')
                     assert remote.status_code == 200
-                    set_config("whale:frp_config_template", remote.text)
+                    if config_format == 'ini':
+                        set_config("whale:frp_config_template", remote.text)
                     self.common = remote.text
+                if config_format == 'toml':
+                    if '[common]' in self.common:
+                        self.common = ''
+                        raise WhaleError('Configure frpc to use TOML before selecting TOML in Whale')
+                    # Shared client settings precede proxy and visitor arrays.
+                    self.common = re.split(
+                        r'(?m)^\s*\[\[\s*(?:proxies|visitors)\s*\]\]',
+                        self.common, maxsplit=1
+                    )[0]
+                    set_config('whale:frp_config_template', self.common)
             config = self.common + '\n' + '\n'.join(str(r) for r in rules)
+            if config_format == 'toml':
+                config = config.encode('utf-8')
             assert self.ses.put(
                 f'{self.url}/api/config', config, timeout=5
             ).status_code == 200

@@ -18,18 +18,49 @@
         value !=None %}value="{{ value }}" {% endif %}>
     </div>
 {% endfor %}
+{% set frp_config_format = get_config('whale:frp_config_format', 'ini') %}
+<div class="form-group">
+    <label for="frp-config-format">
+        Config format
+        <small class="form-text text-muted">
+            Must match the configuration format used by frpc. Existing installations use INI by default.
+        </small>
+    </label>
+    <select class="form-control" id="frp-config-format" name="whale:frp_config_format">
+        <option value="ini" {% if frp_config_format == 'ini' %}selected{% endif %}>INI (default)</option>
+        <option value="toml" {% if frp_config_format == 'toml' %}selected{% endif %}>TOML</option>
+    </select>
+</div>
 {% set frpc_template = get_config("whale:frp_config_template", "") %}
 <div class="form-group">
     <label for="frp-config-template">
         Frpc config template
         <small class="form-text text-muted">
-            Frp config template, only need common section!
+            For INI, include only the [common] section. For TOML, put shared client settings
+            before any [[proxies]] or [[visitors]] arrays; Whale generates the proxy rules.
+            Change this template together with Config format, then submit.
         </small>
     </label>
     <textarea class="form-control input-filled-valid" id="frp-config-template" rows="7"
               name="whale:frp_config_template">{{ frpc_template }}</textarea>
 </div>
 {% if frpc_template %}
+    {% if frp_config_format == 'toml' %}
+    <div class="form-group">
+        <label for="frps-config-template">
+            Frps config template [TOML example]
+            <small class="form-text text-muted">
+                Match bindPort and auth settings to your frpc template before use.
+            </small>
+        </label>
+        <textarea class="form-control input-filled-valid grey-text" id="frps-config-template" rows="6" disabled>
+bindPort = 7000
+auth.token = "replace-with-your-frpc-token"
+vhostHTTPPort = {{ get_config('whale:frp_http_port') }}
+subDomainHost = {{ get_config('whale:frp_http_domain_suffix', '127.0.0.1.xip.io').lstrip('.')|tojson }}
+        </textarea>
+    </div>
+    {% else %}
     <div class="form-group">
         <label for="frps-config-template">
             Frps config template [generated]
@@ -47,4 +78,5 @@
 subdomain_host = {{ get_config('whale:frp_http_domain_suffix', '127.0.0.1.xip.io').lstrip('.') }}
     </textarea>
     </div>
+    {% endif %}
 {% endif %}
